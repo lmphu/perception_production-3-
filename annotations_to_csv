@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+
+
+"""
+#getting the sounding intervalls to norm VOT 
+
+from praatio import textgrid 
+import pandas as pd
+import os
+from os.path import join
+
+#define folderpath
+folderpath = r'/Users/lenahuttner/Desktop/Dissertation/Percprod_data/data_percprod_t_20/Session_584137'
+
+ext = ('.TextGrid')
+startwith = ('binariesblock')
+
+    #get the interval you want
+def getSounding(tg_input):     
+  Soundingfile = []
+  SoundingList = tg_input.tierDict["union"].entryList 
+  labelList = [entry[2] for entry in SoundingList]
+  durationList = []
+  for start, stop, _ in SoundingList:
+      durationList.append(stop - start)
+  Soundingfile = (labelList + durationList)
+  return Soundingfile
+
+
+results = []
+test = []
+for path, dirc, files in os.walk(folderpath):  
+ 
+    for file in files:
+        if file.endswith(ext) and file.startswith(startwith):
+            file_name = []
+            file_name.append(file)
+            tg_input = textgrid.openTextgrid((join(folderpath,file)), False)
+            test = (file_name + getSounding(tg_input))
+        
+            results.append(test)
+Sounding_df = pd.DataFrame(results)#, columns= ['file', 'intervall', 'VOT'] )
+Sounding_df.to_csv((join(folderpath,'Sounding_csv.csv')), index=True, header=False)
+print(Sounding_df)
+print(results)
