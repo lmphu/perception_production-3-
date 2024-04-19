@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov 21 10:56:19 2022
+
+@author: lenahuttner
+"""
+import pandas as pd
+import re
+import os
+from os.path import join
+import numpy as np
+
+pd.set_option('max_columns', None)
+
+folderpath = r'/Users/lenahuttner/Desktop/Dissertation/Percprod_data/data_percprod_contr_t_22/Session_590856'
+
+def rename (df):
+    df = df.rename(columns = {1 :'file'})
+    df = df.replace( {'.*'+'block':'block'}, regex = True )
+    df = df.replace({'.TextGrid': '.wav.pgp'}, regex = True)
+    df.set_index('file')
+    return(df)
+
+def combine_cols (df1):
+    df1['file'] = df1['copy_of_Pre_reco'].fillna(df1['Pre_reco'])
+    df1.set_index('file')
+    return(df1)
+
+file1 = "VOT"
+file2 = "trials"
+
+
+df_VOT = pd.DataFrame()
+df_exp = pd.DataFrame()
+for root, dirc, files in os.walk(folderpath):  
+    #for dir in dirs:
+    #for subdirectory in subdirectories:
+        for file in files:
+            #print(os.path.join(root, file))
+            if file.startswith(file1):
+                df = pd.read_csv(join(folderpath,file), index_col=0, header = None)
+               
+                df_VOT = rename(df)
+           
+
+print(df_VOT)
+
+for root, dirc, files in os.walk(folderpath):  
+  :
+        for file in files:
+            if file.startswith(file2):
+                df1 = pd.read_csv(join(folderpath,file))
+                print(df1)
+                df_exp = combine_cols(df1)
+                
+print(df_exp)
+df_production = pd.merge(df_exp, df_VOT, on= 'file', how='inner')
+df_production.to_csv((join(folderpath,'df_production.csv')), index=True, header=True)
+           
