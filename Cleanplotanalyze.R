@@ -17,7 +17,7 @@ control_t <- read.csv("~/Desktop/Dissertation/Percprod_data/control_t.csv", sep=
 inter_t <- read.csv("~/Desktop/Dissertation/Percprod_data/inter_t.csv", sep=";", stringsAsFactors=TRUE)
 interaction_d <- read.csv("~/Desktop/Dissertation/Percprod_data/interaction_d.csv", sep=";", stringsAsFactors=TRUE)
 
-#these are the files with the speech rate annotattions
+#these are the files with the speech rate annotations
 interaction_d <- read.csv("~/Desktop/Dissertation/Percprod_data/inter_d_SR.csv", sep=";", stringsAsFactors=TRUE)
 inter_t <- read.csv("~/Desktop/Dissertation/Percprod_data/inter_t_SR.csv", sep=";", stringsAsFactors=TRUE)
 Control_d <- read.csv("~/Desktop/Dissertation/Percprod_data/Contr_d_SR.csv", sep=";", stringsAsFactors=TRUE)
@@ -39,11 +39,12 @@ contr_t <- control_t %>% mutate(condition = "contr_t")
 inter_d <- interaction_d %>% mutate(condition = "inter_d")
 inter_t <- inter_t %>% mutate(condition = "inter_t")
 
-
+#rename the stimulus colunmns
 contr_d <- rename(contr_d, prodstim_pre = copy_of_copy_of_factor1_tg1_task5)
 contr_d <- rename(contr_d, prodstim_post = copy_of_copy_of_copy_of_factor1_tg1_task5)
 contr_d <- unite(contr_d, "prod_stim", prodstim_pre:prodstim_post, sep = "", remove = TRUE, na.rm = TRUE)
 
+get the Speech rate duration
 contr_d$Sounding_duration <- as.character(contr_d$Sounding_duration)
 contr_d$Sounding_duration <- as.numeric(contr_d$Sounding_duration)
 contr_d <- contr_d %>%
@@ -392,30 +393,12 @@ c_t_t_post <- c_t_t_post %>%mutate(Task_Name = "Production_post_d")
 
 c_t_t <- rbind(c_t_t_post,c_t_t_pre)
 
-ggplot(data = c_t_t, aes(x=Task_Name, y=mean_vot))+
-  geom_boxplot()
 
 levels <- c('Production_pre_d', 'Production_post_d', 'Production_pre_t', 'Production_post_t') 
 
 
 c_t <- rbind(c_t_d,c_t_t)
-ggplot(data =c_t, aes(x=Task_Name, y=mean_vot))+
-  geom_violin()+
-  geom_boxplot(width = 0.1)+
-  geom_point()+
-  scale_x_discrete(limits = levels)+
-  ggtitle('Listening /t/-bias')+
-  ylab('VOT in ms')+
-  xlab('Task')
 
-contrt_t_model <- rbind(contr_t_t_post, contr_t_t_pre)
-
-contrt_model <- rbind(contrt_t_model, contrt_d_model)
-
-m <- lmer(vot ~ Task_Name + (1|Rec_Session_Id), data = contrt_t_model)
-summary(m)
-anova(m)
-report(m)
 
 #put this all into one nice file & plot 
 #run stats
@@ -478,24 +461,6 @@ contr_d_model$Task_Name <- as.factor(contr_d_model$Task_Name)
 unique(contr_d_model[,'Rec_Session_Id'])
 
 contr_d_model$Task_Name <- relevel(contr_d_model$Task_Name, "Perception_Pre")
-m <-  glmer(resp ~ Task_Name + (1|Rec_Session_Id) + (1|Vot_level), family = binomial, data = contr_d_model)#
-summary(m)
-report(m)#perc_cd$n <- as.factor(perc_cd$n)
-
-contr_d_mid3 <- subset(contr_d_model, Vot_level == "VOT_4"| Vot_level == 'VOT_5'| Vot_level == 'VOT_6')
-m <-  glmer(resp ~  Task_Name + (1|Rec_Session_Id) , family = binomial, data = contr_d_mid3)#
-summary(m) 
-report(m)
-
-ggplot(data = perc_cd, aes(x = Vot_level, y = prop, color = as.factor(task)))+
-  geom_point(aes(group = task))+
-  scale_color_discrete(name = "task")+
-  geom_line(aes(group = task))+
-  scale_color_discrete(name = "task")+
-  xlab("VOT level")+
-  scale_x_discrete(limits = level_order) +
-  ylab('proportion of identification as t')+
-  ggtitle("Listening - /d/ bias ")
 
 #control condition t
 trials_contr_t <-  trials_and_sessions_c_t %>% filter(!(Rec_Session_Id == 590768|Rec_Session_Id == 583084 |Rec_Session_Id == 584002 |Rec_Session_Id == 590638 | Rec_Session_Id ==590679| Rec_Session_Id == 590712 |Rec_Session_Id == 590766  |Rec_Session_Id == 591763| Rec_Session_Id == 595061 |Rec_Session_Id == 593626 |Rec_Session_Id == 593606 |Rec_Session_Id == 591952 |Rec_Session_Id == 593592 ))
@@ -558,34 +523,8 @@ contr_t_model$resp <-  as.factor(contr_t_model$resp)
 
 contr_t_model$Vot_level <-  as.factor(contr_t_model$Vot_level)
 contr_t_model$Task_Name <- as.factor(contr_t_model$Task_Name)
-#unique(contr_t_model[,'Rec_Session_Id'])
 
-contr_t_model$Task_Name <- relevel(contr_t_model$Task_Name, "Perception_Post")
-
-m <-  glmer(resp ~ Task_Name + (1|Rec_Session_Id), family = binomial, data = contr_t_model)#
-summary(m)
-report(m)
-
-contr_t_mid3 <- subset(contr_t_model, Vot_level == "VOT_4"| Vot_level == 'VOT_5'| Vot_level == 'VOT_6')
-m <-  glmer(resp ~  Task_Name + (1|Rec_Session_Id) , family = binomial, data = contr_t_mid3)#
-summary(m) 
-report(m)
-
-#perc_cd$n <- as.factor(perc_cd$n)
-level_order <- c('VOT_1', 'VOT_2', 'VOT_3', 'VOT_4', 'VOT_5', 'VOT_6', 'VOT_7', 'VOT_8', 'VOT_9') 
-
-ggplot(data = perc_ct, aes(x = Vot_level, y = prop, color = as.factor(task)))+
-  geom_point(aes(group = task))+
-  scale_color_discrete(name = "task")+
-  geom_line(aes(group = task))+
-  scale_color_discrete(name = "task")+
-  xlab("VOT level")+
-  scale_x_discrete(limits = level_order) +
-  ylab('proportion of identification as t')+
-  ggtitle("Listening- /t/ bias ")
   
-
-
 #and last one
 trials_intert <-  trials_and_sessions_t %>% filter(!(Rec_Session_Id == 581891 |Rec_Session_Id == 598831 |Rec_Session_Id == 597681|Rec_Session_Id == 584135 |Rec_Session_Id == 581723 | Rec_Session_Id == 595322 |  Rec_Session_Id == 598289))
 
@@ -643,37 +582,7 @@ inter_t_model <- rbind(inter_t_model1, inter_t_model2, inter_t_model3)
 inter_t_model$resp <-  as.factor(inter_t_model$resp)
 inter_t_model$Task_Name <- as.factor(inter_t_model$Task_Name)
 unique(inter_t_model[,"Rec_Session_Id"])
-
-
-
-
 inter_t_model$Task_Name <- relevel(inter_t_model$Task_Name, "Perception_Pre")
-
-m <-  glmer(resp ~  Task_Name* (1|Rec_Session_Id)+ (1|Vot_level), family = binomial, data = inter_t_model)#
-summary(m) 
-report(m)
-
-m <-  glmer(resp ~  Task_Name * (1|Rec_Session_Id), family = binomial, data = inter_t_model)#
-summary(m) 
-report(m)
-
-inter_t_mid3 <- subset(inter_t_model, Vot_level == "VOT_4"| Vot_level == 'VOT_5'| Vot_level == 'VOT_6')
-m <-  glmer(resp ~  Task_Name + (1|Rec_Session_Id)  , family = binomial, data = inter_t_mid3)#
-summary(m) 
-report(m)
-#perc_cd$n <- as.factor(perc_cd$n)
-
-level_order <- c('VOT_1', 'VOT_2', 'VOT_3', 'VOT_4', 'VOT_5', 'VOT_6', 'VOT_7', 'VOT_8', 'VOT_9') 
-
-ggplot(data = perc_it, aes(x = Vot_level, y = prop, color = as.factor(task)))+
-  geom_point(aes(group = task))+
-  scale_color_discrete(name = "task")+
-  geom_line(aes(group = task))+
-  scale_x_discrete(limits=level_order)+
-  scale_color_discrete(name = "task")+
-  xlab("VOT level")+
-  ylab('proportion of identification as d')+
-  ggtitle("Listening & speaking - t bias")
 
 #last one
 
@@ -838,13 +747,6 @@ perc_t_prepost <- merge(perc_t_model_post, perc_t_model_pre, by = 'Rec_Session_I
 perc_t_prepost$resp.x <-  as.factor(perc_t_prepost$resp.x)
 perc_t_prepost$resp.y <-  as.factor(perc_t_prepost$resp.y)
 
-m1 <- aov(resp.x ~ condition.x* Vot_level.x + resp.y, data= perc_t_prepost)
-Anova(m1, type = 'III')
-
-
-m <- glmer(resp ~ condition + (1|Rec_Session_Id)  , family = binomial, data = perc_d_model_int)#
-summary(m)
-report(m)
 
 
 
@@ -887,7 +789,6 @@ plot(m3)
 m0 <- glmer(resp ~ condition * task + (1|Rec_Session_Id), family = binomial (link = 'logit'), data = perc_all_model, glmerControl(optimizer = "bobyqa"))
 summary(m0)
 
-
 emm0 <- emmeans(m0,  ~ condition * task)
 pairs(emm0, adjust = "fdr")
 
@@ -901,6 +802,7 @@ m5 <- glmer(resp ~ condition * task + (1 + Vot_level|Rec_Session_Id), family = b
 summary(m5)
 report(m5)
 lmerTest(m5)
+
 
 #so let's try for only the middle 3 stimuli: 
 
